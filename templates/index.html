@@ -11,21 +11,60 @@
     <div class="container mx-auto p-4">
         <h1 class="text-3xl font-bold mb-4">Chat App</h1>
         
-        <div class="my-4">
+        <div id="messages" class="my-4">
             <h2 class="text-xl font-bold mb-2">Messages:</h2>
-            <ul>
+            <ul id="message-list">
                 {% for message in messages %}
                     <li class="bg-white rounded p-2 mb-2">{{ message }}</li>
                 {% endfor %}
             </ul>
         </div>
         
-        <form action="/send" method="post" class="my-4">
-            <input type="text" name="message" placeholder="Enter your message" class="border rounded py-2 px-4 mr-2">
+        <form id="message-form" class="my-4">
+            <input type="text" id="message-input" placeholder="Enter your message" class="border rounded py-2 px-4 mr-2">
             <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded">Send</button>
         </form>
         
         <p class="text-sm text-gray-500">Public IP Address: {{ public_ip }}</p>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageForm = document.getElementById('message-form');
+            const messageInput = document.getElementById('message-input');
+            const messageList = document.getElementById('message-list');
+
+            messageForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                fetch('/send', {
+                    method: 'POST',
+                    body: new URLSearchParams({ 'message': messageInput.value }),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        messageInput.value = '';
+                    }
+                });
+            });
+
+            function loadMessages() {
+                fetch('/')
+                .then(response => response.text())
+                .then(html => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const newMessages = tempDiv.querySelector('#message-list').innerHTML;
+                    messageList.innerHTML = newMessages;
+                });
+            }
+
+            setInterval(loadMessages, 3000); // Auto-reload messages every 3 seconds
+        });        
+    </script>
 </body>
 </html>
