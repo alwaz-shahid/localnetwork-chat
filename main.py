@@ -39,7 +39,7 @@ def send_message():
 
 if __name__ == "__main__":
     # Define the port number
-    port = 12345
+    port = 5000
     
     # Start the server thread
     server_thread = threading.Thread(target=server_thread, args=(port,))
